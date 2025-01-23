@@ -23,17 +23,51 @@ if uploaded_file is not None:
     col1, col2 = st.columns(2)
     
     with col1:
-        st.write("col1")
+        st.subheader("Configuration du graphique")
+        
         chart_type = st.selectbox(
-            "Choisir le type de graphique a afficher",
+            "Choisir le type de graphique à afficher",
             ("Bar Chart", "Line Chart", "Scatter Plot")
         )
+
+        x_axis = st.selectbox("Sélectionner la colonne pour l'axe X", selected_columns)
+        y_axis = st.selectbox("Sélectionner la colonne pour l'axe Y", selected_columns)
+        
         
     
     with col2:
-        st.write("col2")
-        if st.button("Afficher Graphique"):
-            st.write('afficher graphique')
+        st.subheader("Action")
+        if st.button("Afficher le Graphique"):
+            st.write("Graphique généré :")
+            
+            fig, ax = plt.subplots()
+
+            if chart_type == "Bar Chart":
+                sns.barplot(
+                    data=edited_df, 
+                    x=x_axis, 
+                    y=y_axis, 
+                    ax=ax,
+                    errorbar=None
+                )
+            
+            elif chart_type == "Line Chart":
+                sns.lineplot(
+                    data=edited_df, 
+                    x=x_axis, 
+                    y=y_axis, 
+                    ax=ax
+                )
+                
+            elif chart_type == "Scatter Plot":
+                sns.scatterplot(
+                    data=edited_df, 
+                    x=x_axis, 
+                    y=y_axis, 
+                    ax=ax
+                )
+            plt.tight_layout()
+            st.pyplot(fig)
         
         if edited_df is not None:
             st.download_button(
@@ -45,7 +79,6 @@ if uploaded_file is not None:
 
 
 
-    
 
 
 
