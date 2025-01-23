@@ -11,6 +11,8 @@ st.set_page_config(
     layout='wide'
 )
 
+
+
 try:
     st.sidebar.write(st.secrets['API_KEY'])
 except:
@@ -23,23 +25,11 @@ except:
     st.sidebar.error('pas de clé - 2')
 
 
-# upload file
-uploaded_file = st.file_uploader("Choose a file", type="csv")
-if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file, delimiter=";")
-    selected_columns = st.multiselect("Selectionner les colonnes du dataframe", df.columns)
-    edited_df = st.data_editor(df[selected_columns])
-    st.download_button(
-        label="download data as csv",
-        data=edited_df.to_csv(),
-        file_name="df.csv",
-        mime="text/csv"
-    )
 
-# @st.cache_data
-# def load_data():
-#     return pd.read_csv('https://raw.githubusercontent.com/Quera-fr/Python-Programming/refs/heads/main/data.csv')
-# df = load_data()
+@st.cache_data
+def load_data():
+    return pd.read_csv('https://raw.githubusercontent.com/Quera-fr/Python-Programming/refs/heads/main/data.csv')
+df = load_data()
 
 
 
