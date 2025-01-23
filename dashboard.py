@@ -4,6 +4,12 @@ import streamlit as st
 import pandas as pd
 import seaborn as sns
 
+st.set_page_config(
+    page_title='Streamlit',
+    page_icon="🔫",
+    layout='wide'
+)
+
 @st.cache_data
 def load_data():
     return pd.read_csv('https://raw.githubusercontent.com/Quera-fr/Python-Programming/refs/heads/main/data.csv')
@@ -15,11 +21,7 @@ except:
 
 df = load_data()
 
-st.set_page_config(
-    page_title='Streamlit',
-    page_icon="🔫",
-    layout='wide'
-)
+
 
 st.title("Données avec Streamlit")
 
