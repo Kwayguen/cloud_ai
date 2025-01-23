@@ -8,6 +8,11 @@ import seaborn as sns
 def load_data():
     return pd.read_csv('https://raw.githubusercontent.com/Quera-fr/Python-Programming/refs/heads/main/data.csv')
 
+try:
+    st.sidebar.secrets['API_KEY']
+except:
+    st.error('pas de clé')
+
 df = load_data()
 
 st.set_page_config(
