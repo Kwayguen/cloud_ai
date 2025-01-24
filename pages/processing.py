@@ -31,43 +31,104 @@ if uploaded_file is not None:
         )
 
         x_axis = st.selectbox("Sélectionner la colonne pour l'axe X", selected_columns)
-        y_axis = st.selectbox("Sélectionner la colonne pour l'axe Y", selected_columns)
+        reverse_x = st.checkbox("Inverser l'axe X", key="reverse_x")
+        y_axes = st.multiselect(
+            "Sélectionner les colonnes pour l'axe Y", 
+            selected_columns, 
+            default=selected_columns
+        )
+        reverse_y_options = {}
+        for y in y_axes:
+            reverse_y_options[y] = st.checkbox(
+                f"Inverser l'axe Y pour '{y}' (Line/Scatter uniquement)",
+                key=f"reverse_y_{y}"
+            )
+
         
         
     
     with col2:
         st.subheader("Action")
         if st.button("Afficher le Graphique"):
-            st.write("Graphique généré :")
-            
-            fig, ax = plt.subplots()
-
-            if chart_type == "Bar Chart":
-                sns.barplot(
-                    data=edited_df, 
-                    x=x_axis, 
-                    y=y_axis, 
-                    ax=ax,
-                    errorbar=None
-                )
-            
-            elif chart_type == "Line Chart":
-                sns.lineplot(
-                    data=edited_df, 
-                    x=x_axis, 
-                    y=y_axis, 
-                    ax=ax
-                )
+            if not y_axes:
+                st.error("Veuillez sélectionner au moins une colonne pour l'axe Y.")
+            else:
+                st.write("Graphique généré :")
                 
-            elif chart_type == "Scatter Plot":
-                sns.scatterplot(
-                    data=edited_df, 
-                    x=x_axis, 
-                    y=y_axis, 
-                    ax=ax
-                )
-            plt.tight_layout()
-            st.pyplot(fig)
+                fig, ax = plt.subplots(figsize=(6,4))  # Adjust size as needed
+                color_palette = sns.color_palette(n_colors=len(y_axes))
+
+                # ------------------
+                #     BAR CHART
+                # ------------------
+                if chart_type == "Bar Chart":
+                    # Melt all chosen Y columns
+                    edited_df_melt = edited_df.melt(
+                        id_vars=x_axis, 
+                        value_vars=y_axes, 
+                        var_name='Variable', 
+                        value_name='Valeur'
+                    )
+                    
+                    # Single call to barplot with hue='Variable'
+                    sns.barplot(
+                        data=edited_df_melt,
+                        x=x_axis,
+                        y='Valeur',
+                        hue='Variable',
+                        ax=ax,
+                        errorbar=None
+                    )
+                    
+                    # Since a single bar chart uses one Y-axis,
+                    # we cannot invert the Y-axis individually per column.
+                    # If you want to invert the entire Y-axis (all columns),
+                    # you can add a single checkbox for the bar chart, e.g.:
+                    # if st.checkbox("Inverser l'axe Y (Bar Chart)"):
+                    #     ax.invert_yaxis()
+
+                # ------------------
+                #    LINE CHART
+                # ------------------
+                elif chart_type == "Line Chart":
+                    for idx, y in enumerate(y_axes):
+                        sns.lineplot(
+                            data=edited_df,
+                            x=x_axis,
+                            y=y,
+                            label=y,
+                            ax=ax,
+                            color=color_palette[idx]
+                        )
+                        
+                        # Invert Y (only for this column) if requested
+                        if reverse_y_options[y]:
+                            ax.invert_yaxis()
+
+                # ------------------
+                #   SCATTER PLOT
+                # ------------------
+                elif chart_type == "Scatter Plot":
+                    for idx, y in enumerate(y_axes):
+                        sns.scatterplot(
+                            data=edited_df,
+                            x=x_axis,
+                            y=y,
+                            label=y,
+                            ax=ax,
+                            color=color_palette[idx]
+                        )
+                        
+                        # Invert Y (only for this column) if requested
+                        if reverse_y_options[y]:
+                            ax.invert_yaxis()
+                
+                # Invert X-axis if requested (applies to all columns)
+                if reverse_x:
+                    ax.invert_xaxis()
+                
+                plt.tight_layout()
+                st.pyplot(fig)
         
         if edited_df is not None:
             st.download_button(
